@@ -11,6 +11,7 @@
   "author": "",
   "license": "BUSL-1.1",
   "dependencies": {
+    "secret-ai-sdk": "file:/Users/bigromanov/Code/scrt/secret-ai-sdk-js",
     "@pinata/sdk": "^2.1.0",
     "@types/axios": "^0.14.0",
     "axios": "^1.1.3",
