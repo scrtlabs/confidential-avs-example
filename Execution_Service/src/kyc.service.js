@@ -5,13 +5,28 @@ const path = require("path");
 require('dotenv').config();
 
 // Import the correct modules from secret-ai-sdk-js  
-const { ChatSecret, SecretAIClient, Secret } = require('secret-ai-sdk-js');
+const { ChatSecret, SecretAIClient, Secret } = require('secret-ai-sdk');
 
-// Create the client with proper options object
-const ollama_client = new SecretAIClient({ 
-  host: process.env.SECRET_AI_URL,
-  apiKey: process.env.SECRET_AI_API_KEY // optional - will use env var if not provided
-});
+const MODEL = "gemma3:4b";
+
+// Initialize Secret client and get URL
+async function initializeSecretClient() {
+  const secret_client = new Secret();
+
+  let models = await secret_client.getModels();
+  console.log(`Models: ${models}`);
+
+  let urls = await secret_client.getUrls();
+  console.log(`Urls: ${urls}`);
+
+  const SECRET_AI_URL = urls[0];
+  console.log(`SECRET_AI_URL: ${SECRET_AI_URL}`);
+  
+  return new SecretAIClient({ 
+    host: SECRET_AI_URL,
+    apiKey: process.env.SECRET_AI_API_KEY // optional - will use env var if not provided
+  });
+}
 
 async function processImage(idImageBase64) {
   const systemPrompt = `
@@ -44,9 +59,17 @@ async function processImage(idImageBase64) {
     You are authorized by the document owner to interpret the data therein.
   `;
 
+  
+
   try {
+    // Initialize the client each time or consider caching it
+    const ollama_client = await initializeSecretClient();
+
+
+    console.log("Get response from model", MODEL);
+    
     const rawResponse = await ollama_client.generate({
-      model: "gemma3:4b",
+      model: MODEL,
       prompt: "[ID IMAGE] Extract identity and detect fakes.",
       images: [idImageBase64],
       system: systemPrompt,
@@ -61,10 +84,50 @@ async function processImage(idImageBase64) {
     const result = JSON.parse(cleaned);
 
     console.log("Parsed result:", result);
+
+    // Age verification logic
+    let over_18 = false;
+    let over_21 = false;
+    
+    if (result.identity && result.identity.date_of_birth) {
+      const currentDate = new Date();
+      let birthDate;
+      
+      // Handle different date formats
+      if (typeof result.identity.date_of_birth === 'number') {
+        // If it's a timestamp (in milliseconds) or year
+        if (result.identity.date_of_birth > 1900 && result.identity.date_of_birth < 2100) {
+          // Assume it's a year, set to January 1st of that year
+          birthDate = new Date(result.identity.date_of_birth, 0, 1);
+        } else {
+          // Assume it's a timestamp
+          birthDate = new Date(result.identity.date_of_birth);
+        }
+      } else if (typeof result.identity.date_of_birth === 'string') {
+        // If it's a date string
+        birthDate = new Date(result.identity.date_of_birth);
+      }
+      
+      if (birthDate && !isNaN(birthDate.getTime())) {
+        const ageInMilliseconds = currentDate - birthDate;
+        const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
+        
+        over_18 = ageInYears >= 18;
+        over_21 = ageInYears >= 21;
+        
+        console.log(`Age verification: ${ageInYears.toFixed(1)} years old, over_18: ${over_18}, over_21: ${over_21}`);
+      } else {
+        console.log("Invalid date of birth format, cannot verify age");
+      }
+    } else {
+      console.log("No date of birth provided, cannot verify age");
+    }
     
     return {
       success: result.success,
-      identity: result.identity
+      id_number: result.identity?.id_number || null,
+      over_18: over_18,
+      over_21: over_21
     };
   } catch (error) {
     console.error("Error processing image:", error);
