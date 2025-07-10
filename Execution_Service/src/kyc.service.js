@@ -153,21 +153,51 @@ async function uploadKycImage(fileBuffer = null) {
     
     // Process the image using the AI model
     const response = await processImage(idImageBase64);
+
+
+    const testQuotePath = path.resolve(__dirname, "../data/quote.txt");
+    const prodQuotePath = path.resolve("./crypto/docker_attestation_ed25519.txt");
+
+    let quotePath;
+    try {
+      if (fs.existsSync(prodQuotePath)) {
+        quotePath = prodQuotePath;
+      } else {
+        quotePath = testQuotePath;
+      }
+    } catch (error) {
+      console.log("Error checking quote paths:", error.message);
+      quotePath = testQuotePath;
+    }
     
     // Read quote from data/quote.txt if it exists
     let quote = null;
     try {
-      const quotePath = path.resolve(__dirname, "../data/quote.txt");
       quote = fs.readFileSync(quotePath, 'utf-8').trim();
     } catch (error) {
       console.log("No quote file found or error reading quote:", error.message);
     }
     
     response.quote = quote;
+
+    const testPrivateKeyPath = path.resolve(__dirname, "../data/private_key.pem");
+    const prodPrivateKeyPath = path.resolve("./crypto/docker_private_key_ed25519.pem");
+
+    let privateKeyPath;
+    try {
+      if (fs.existsSync(prodPrivateKeyPath)) {
+        privateKeyPath = prodPrivateKeyPath;
+      } else {
+        privateKeyPath = testPrivateKeyPath;
+      }
+    } catch (error) {
+      console.log("Error checking private key paths:", error.message);
+      privateKeyPath = testPrivateKeyPath;
+    }
     
-    // TODO: Add signature logic here if needed
-    // const signature = signJsonResponse(response.identity, "data/private_key.pem");
-    // response.signature = signature;
+    
+    const signature = signJsonResponse(response.identity,privateKeyPath);
+    response.signature = signature;
     
     console.log("✅ KYC Processing Result:");
     console.log(response);
@@ -180,6 +210,23 @@ async function uploadKycImage(fileBuffer = null) {
   }
 }
 
+function signJsonResponse(jsonData, privateKeyPath) {
+    const crypto = require('crypto');
+    
+    // Serialize JSON data with sorted keys (equivalent to Python's sort_keys=True)
+    const message = JSON.stringify(jsonData, Object.keys(jsonData).sort());
+    
+    // Load private key from PEM file
+    const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf-8');
+    const privateKey = crypto.createPrivateKey(privateKeyPem);
+    
+    // Sign the message
+    const signature = crypto.sign(null, Buffer.from(message, 'utf-8'), privateKey);
+    
+    // Return base64-encoded signature
+    return signature.toString('base64');
+}
+
 module.exports = {
     uploadKycImage,
-  }
+}
