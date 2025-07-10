@@ -135,12 +135,20 @@ async function processImage(idImageBase64) {
   }
 }
 
-async function uploadKycImage() {
+async function uploadKycImage(fileBuffer = null) {
   try {
-    const filePath = path.resolve(__dirname, "id.png");
+    let imageBuffer;
     
-    // Read and encode the image file
-    const imageBuffer = fs.readFileSync(filePath);
+    if (fileBuffer) {
+      // Use the provided file buffer
+      imageBuffer = fileBuffer;
+    } else {
+      // Fallback to reading the local file
+      const filePath = path.resolve(__dirname, "id.png");
+      imageBuffer = fs.readFileSync(filePath);
+    }
+    
+    // Encode the image file
     const idImageBase64 = imageBuffer.toString('base64');
     
     // Process the image using the AI model
