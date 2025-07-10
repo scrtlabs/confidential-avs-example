@@ -126,6 +126,7 @@ async function processImage(idImageBase64) {
     return {
       success: result.success,
       id_number: result.identity?.id_number || null,
+      country: result.identity?.country || null,
       over_18: over_18,
       over_21: over_21
     };
@@ -196,7 +197,11 @@ async function uploadKycImage(fileBuffer = null) {
     }
     
     
-    const signature = signJsonResponse(response.identity,privateKeyPath);
+    const signature = signJsonResponse({
+      id_number: response.id_number,
+      over_18: response.over_18,
+      over_21: response.over_21
+    }, privateKeyPath);
     response.signature = signature;
     
     console.log("✅ KYC Processing Result:");
@@ -212,6 +217,11 @@ async function uploadKycImage(fileBuffer = null) {
 
 function signJsonResponse(jsonData, privateKeyPath) {
     const crypto = require('crypto');
+    
+    // Handle null or undefined jsonData
+    if (!jsonData || typeof jsonData !== 'object') {
+        throw new Error('Invalid jsonData provided to signJsonResponse');
+    }
     
     // Serialize JSON data with sorted keys (equivalent to Python's sort_keys=True)
     const message = JSON.stringify(jsonData, Object.keys(jsonData).sort());
