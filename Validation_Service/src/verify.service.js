@@ -11,7 +11,7 @@ async function verify(proofOfTask) {
   
   try {
     const inputJson = await dalService.getIPfsTask(proofOfTask);
-    console.log("in the verifificatin", inputJson);
+    console.log("in the verifification", inputJson);
     // Step 1: Extract fields
     const response = inputJson.response;
     const quote = response.quote;
@@ -22,12 +22,16 @@ async function verify(proofOfTask) {
       throw new Error("Missing required field in input JSON");
     }
 
+    console.log("parse quote", quote);
+
     // Step 2: Send quote to PCCS API
     const apiResp = await axios.post(
       "https://pccs.scrtlabs.com/dcap-tools/quote-parse",
       new URLSearchParams({ quote }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
+
+    console.log("apiResp", apiResp);
       
     const reportDataHex = apiResp.data?.quote?.report_data;
     console.log("reportDataHex", reportDataHex);

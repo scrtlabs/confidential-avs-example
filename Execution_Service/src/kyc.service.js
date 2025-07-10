@@ -179,7 +179,7 @@ async function uploadKycImage(fileBuffer = null) {
       console.log("No quote file found or error reading quote:", error.message);
     }
     
-    response.quote = quote;
+    
 
     const testPrivateKeyPath = path.resolve(__dirname, "../data/private_key.pem");
     const prodPrivateKeyPath = path.resolve("./crypto/docker_private_key_ed25519.pem");
@@ -196,17 +196,21 @@ async function uploadKycImage(fileBuffer = null) {
       privateKeyPath = testPrivateKeyPath;
     }
     
-    
-    const signature = signJsonResponse({
+    const identity = {
       id_number: response.id_number,
       over_18: response.over_18,
       over_21: response.over_21
-    }, privateKeyPath);
+    };
+
+    const signature = signJsonResponse(identity, privateKeyPath);
+
+    response.identity = identity;
+    response.quote = quote;
     response.signature = signature;
     
     console.log("✅ KYC Processing Result:");
     console.log(response);
-    return response;
+    return {response: response};
     
   } catch (error) {
     console.error("❌ KYC processing failed:");
