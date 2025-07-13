@@ -1,0 +1,11 @@
+services:
+  validation-service:
+    build:
+      context: ./Validation_Service
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${VALIDATION_SERVICE_PORT:-4002}:4002"
+    networks:
+      - default 

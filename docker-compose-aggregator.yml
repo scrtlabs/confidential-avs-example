@@ -1,0 +1,22 @@
+services:
+  aggregator:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: [
+      "run",
+      "aggregator",
+      "--json-rpc",
+      # "--internal-tasks"
+    ]
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
+    ports:
+      - "8545:8545"
+      - "9876:9876"
+    networks:
+      - default 

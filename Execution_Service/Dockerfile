@@ -6,11 +6,16 @@ RUN apt-get update && apt-get install -y git
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy application files first
+# Copy application files and submodules
 COPY . .
 
-# Remove any existing sdk directory and clone the SDK
-RUN rm -rf sdk && git clone https://github.com/scrtlabs/secret-ai-sdk-js.git sdk
+# Initialize and update submodules
+RUN git init && \
+    git config --global init.defaultBranch main && \
+    git add . && \
+    git commit -m "Temporary commit for Docker build" && \
+    git submodule init && \
+    git submodule update
 
 # Build the SDK
 WORKDIR /usr/src/app/sdk
