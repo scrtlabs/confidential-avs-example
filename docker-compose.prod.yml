@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  validation-service:
+    image: ghcr.io/alexr-scrt/validation-service:latest
+    container_name: validation-service
+    restart: unless-stopped
+
+  attester-1:
+    image: ghcr.io/alexr-scrt/attester-1:latest
+    container_name: attester-1
+    restart: unless-stopped
+
+  attester-2:
+    image: ghcr.io/alexr-scrt/attester-2:latest
+    container_name: attester-2
+    restart: unless-stopped
+
+  attester-3:
+    image: ghcr.io/alexr-scrt/attester-3:latest
+    container_name: attester-3
+    restart: unless-stopped
+
+  aggregator:
+    image: ghcr.io/alexr-scrt/aggregator:latest
+    container_name: aggregator
+    restart: unless-stopped
+
+  execution-service:
+    image: ghcr.io/alexr-scrt/execution-service:latest
+    container_name: execution-service
+    restart: unless-stopped
