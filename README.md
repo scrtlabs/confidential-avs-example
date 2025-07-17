@@ -10,6 +10,7 @@
 4. [Prerequisites](#prerequisites)
 5. [Installation](#installation)
 6. [Usage](#usage)
+7. [Service Start-up Order](#service-start-up-order)
 
 ---
 
@@ -108,6 +109,76 @@ Validation Service logic:
    docker compose build --no-cache
    docker compose up
    curl -X POST http://localhost:4003/task/execute
+   ```
+
+## Service Start-up Order
+
+To ensure proper initialization and communication between services, start them in the following order:
+
+### 1. Start Aggregator
+```bash
+docker compose -f docker-compose-aggregator.yml up -d
+```
+
+### 2. Start Attesters
+```bash
+for i in 1 2 3; do
+  docker compose -f docker-compose-attester-$i.yml up -d
+done
+```
+
+### 3. Start Validation Service
+```bash
+docker compose -f docker-compose-validation-service.yml up -d
+```
+
+### 4. Start Execution Service
+```bash
+docker compose -f docker-compose-execution-service.yml up -d
+```
+
+### Troubleshooting
+
+If you encounter issues with service startup or communication:
+
+1. **Check container logs** for detailed error messages:
+   ```bash
+   docker compose -f docker-compose-aggregator.yml logs
+   docker compose -f docker-compose-attester-1.yml logs
+   docker compose -f docker-compose-validation-service.yml logs
+   docker compose -f docker-compose-execution-service.yml logs
+   ```
+
+2. **Verify network connectivity** between services:
+   ```bash
+   # Test connectivity to aggregator
+   ping 10.8.0.1
+   
+   # Test connectivity to attesters
+   ping 10.8.0.2
+   ping 10.8.0.3
+   ping 10.8.0.4
+   
+   # Test connectivity to validation service
+   ping 10.8.0.5
+   
+   # Test connectivity to execution service
+   ping 10.8.0.6
+   ```
+
+3. **Check service health** by monitoring container status:
+   ```bash
+   docker ps
+   ```
+
+4. **Restart services** if needed (in the same order as startup):
+   ```bash
+   docker compose -f docker-compose-aggregator.yml restart
+   docker compose -f docker-compose-attester-1.yml restart
+   docker compose -f docker-compose-attester-2.yml restart
+   docker compose -f docker-compose-attester-3.yml restart
+   docker compose -f docker-compose-validation-service.yml restart
+   docker compose -f docker-compose-execution-service.yml restart
    ```
 
 Happy Building! 🚀

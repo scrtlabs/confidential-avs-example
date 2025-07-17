@@ -1,10 +1,13 @@
-x-otnode: &otnode
-  build:
-    context: .
-    dockerfile: ./Dockerfile
+version: '3.8'
+
 services:
   aggregator:
-    <<: *otnode
+    image: ghcr.io/alexr-scrt/aggregator-arm:latest
+    container_name: aggregator
+    restart: unless-stopped
+    env_file:
+      - .env
+
     command: [
       "run",
       "aggregator",
@@ -21,8 +24,14 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.69
+
   attester-1:
-    <<: *otnode
+    image: ghcr.io/alexr-scrt/attester-1-arm:latest
+    container_name: attester-1
+    restart: unless-stopped
+    env_file:
+      - .env
+    
     command: [
       "run",
       "attester",
@@ -40,8 +49,14 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.2
+
   attester-2:
-    <<: *otnode
+    image: ghcr.io/alexr-scrt/attester-2-arm:latest
+    container_name: attester-2
+    restart: unless-stopped
+    env_file:
+      - .env
+    
     command: [
       "run",
       "attester",
@@ -59,8 +74,14 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.3
+
   attester-3:
-    <<: *otnode
+    image: ghcr.io/alexr-scrt/attester-3-arm:latest
+    container_name: attester-3
+    restart: unless-stopped
+    env_file:
+      - .env
+    
     command: [
       "run",
       "attester",
@@ -78,29 +99,35 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.4
+
   validation-service:
-    build:
-      context: ./Validation_Service
-      dockerfile: ./Dockerfile
+    image: ghcr.io/alexr-scrt/validation-service-arm:latest
+    container_name: validation-service
+    restart: unless-stopped
+    env_file:
+      - .env
     
     networks:
       p2p:
         ipv4_address: 10.8.0.42
+
   execution-service:
-    build:
-      context: ./Execution_Service
-      dockerfile: ./Dockerfile
+    image: ghcr.io/alexr-scrt/execution-service-arm:latest
+    container_name: execution-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
       - PRIVATE_KEY=${PRIVATE_KEY_PERFORMER}
-      
       - SECRET_AI_API_KEY=${SECRET_AI_API_KEY}
-    
     ports:
       - "4003:4003"
     networks:
       p2p:
         ipv4_address: 10.8.0.101
+
 networks:
   p2p:
     driver: bridge

@@ -1,0 +1,26 @@
+services:
+ attester-1:
+    image: ghcr.io/alexr-scrt/attester-1-arm:latest
+    container_name: attester-1
+    restart: unless-stopped
+    env_file:
+      - .env
+    
+    command: [
+      "run",
+      "attester",
+      "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      "--avs-webapi",
+      "http://10.8.0.42",
+    ]
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
+    networks:
+      containers-arm_p2p:
+        ipv4_address: 10.8.0.2
+
+networks:
+  containers-arm_p2p:
+    external: true
