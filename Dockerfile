@@ -26,7 +26,7 @@ RUN cd Execution_Service/sdk && npm install && npm run build
 # Install dependencies for the main application
 RUN cd Execution_Service && npm install
 
-RUN npm i -g @othentic/cli
-RUN npm i -g @othentic/node
+RUN npm i -g @othentic/cli@1.0.0
+RUN npm i -g @othentic/node@1.0.0
 
 ENTRYPOINT [ "otnode" ]

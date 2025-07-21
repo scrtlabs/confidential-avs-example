@@ -22,7 +22,7 @@ services:
       - "8545:8545"
       - "9876:9876"
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.69
 
   attester-1:
@@ -47,7 +47,7 @@ services:
       aggregator:
         condition: service_started
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.2
 
   attester-2:
@@ -72,7 +72,7 @@ services:
       aggregator:
         condition: service_started
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.3
 
   attester-3:
@@ -97,7 +97,7 @@ services:
       aggregator:
         condition: service_started
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.4
 
   validation-service:
@@ -108,7 +108,7 @@ services:
       - .env
     
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.42
 
   execution-service:
@@ -125,11 +125,11 @@ services:
     ports:
       - "4003:4003"
     networks:
-      p2p:
+      p2p-arm:
         ipv4_address: 10.8.0.101
 
 networks:
-  p2p:
+  p2p-arm:
     driver: bridge
     ipam:
      config:
