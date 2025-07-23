@@ -79,7 +79,7 @@ The Performer Node receives information from the end user (in this case, images 
 
 Once the image recognition is complete, Performer creates a  ([verifiably signed message](https://docs.scrt.network/secret-network-documentation/secretvm-confidential-virtual-machines/verifiable-message-signing)) contaning the user's nationality and two additional Boolean fields desribing the user's age:
 - is_over_18
-- is_over_2
+- is_over_21
 
 The message and the Atestation Quote of the Performer Node is then passed to the P2P networking layers and can be verified by the Attesters
 
@@ -125,7 +125,7 @@ Attester nodes perform the following verification routine:
 4. Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
 
    ```
-   cd simple-price-oracle-avs-example
+   cd kyc-avs-demo
    docker compose build --no-cache
    docker compose up
    curl -X POST http://localhost:4003/task/execute
