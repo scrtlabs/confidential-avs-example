@@ -3,7 +3,6 @@ const { Router } = require("express")
 const multer = require("multer");
 const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
-const oracleService = require("./oracle.service");
 const dalService = require("./dal.service");
 const kycService = require("./kyc.service");
 const router = Router()
@@ -43,8 +42,11 @@ router.post("/execute", upload.single('image'), async (req, res) => {
 
         
         const cid = await dalService.publishJSONToIpfs(result);
-        const data = result.response;
+        const data = "kyc verification";
+
+        console.log("Sending task to DAL", data);
         await dalService.sendTask(cid, data, taskDefinitionId);
+        
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
         console.log(error)
