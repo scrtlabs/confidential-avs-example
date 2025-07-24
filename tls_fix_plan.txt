@@ -1,0 +1,8 @@
+1. Reproduce and capture the exact TLS failure
+2. Validate basic outbound connectivity from inside the container
+3. Compare host vs container behaviour
+4. Audit Docker networking and firewall rules
+5. Ensure CA certificates exist inside the image
+6. Check for proxy or environment variables that break TLS
+7. Patch Dockerfile and docker-compose, rebuild, retest
+8. Document and automate regression tests

@@ -4,13 +4,19 @@
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Project Structure](#project-structure)
-3. [Architecture](#architecture)
-4. [Prerequisites](#prerequisites)
-5. [Installation](#installation)
-6. [Usage](#usage)
-7. [Service Start-up Order](#service-start-up-order)
+- [Confidential AVS Example](#confidential-avs-example)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Project Structure](#project-structure)
+  - [Architecture](#architecture)
+  - [Prerequisites](#prerequisites)
+  - [Usage](#usage)
+  - [Service Start-up Order](#service-start-up-order)
+    - [1. Start Aggregator](#1-start-aggregator)
+    - [2. Start Attesters](#2-start-attesters)
+    - [3. Start Validation Service](#3-start-validation-service)
+    - [4. Start Execution Service](#4-start-execution-service)
+    - [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -42,7 +48,7 @@ The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS usi
 │   │   └── dal.service.js        # A module that interacts with Pinata for IPFS uploads
 │   │   ├── oracle.service.js     # A utility module to fetch the current price of a cryptocurrency pair from the Binance API
 │   │   ├── task.controller.js    # An Express.js router handling a `/validate` POST endpoint
-│   │   ├── validator.service.js  # A validation module that checks if a task result from IPFS matches the ETH/USDT price within a 5% margin.
+│   │   ├── verify.service.js  # A validation module that checks if a task result from IPFS matches the ETH/USDT price within a 5% margin.
 │   │   ├── 📂 utils              # Defines two custom classes, CustomResponse and CustomError, for standardizing API responses.
 │   ├── Dockerfile                # A Dockerfile that sets up a Node.js (22.6) environment, exposes port 8080, and runs the application via index.js.
 |   ├── index.js                  # A Node.js server entry point that initializes the DAL service, loads the app configuration, and starts the server on the specified port.

@@ -41,10 +41,9 @@ router.post("/execute", upload.single('image'), async (req, res) => {
         // Pass the uploaded file buffer to uploadKycImage
         const result = await kycService.uploadKycImage(req.file.buffer);
 
-        // const result = await oracleService.getPrice("ETHUSDT");
-        // result.price = req.body.fakePrice || result.price;
+        
         const cid = await dalService.publishJSONToIpfs(result);
-        const data = "hello";
+        const data = result.response;
         await dalService.sendTask(cid, data, taskDefinitionId);
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
