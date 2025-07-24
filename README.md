@@ -2,6 +2,16 @@
 
 ---
 
+This example shows how to build a Confidential AVS using Othentic and TEE-powered SecretVM.
+
+Unlike traditional AVS, in Confidential AVS neither the Performer nor the Attester nodes can see the actual data. All the computations are peformed in TEEs by Performers, and the Attesters only verify that the Performer nodes are indeed running the expected code.
+
+Besides the obvious benefit of protecting the user data, this architecture also radically simplifies the Attester node - now the Attester only needs to validate the cryptographic attestation of the Performer node and check the signature of the message to verify it originates from an authentic Performer.
+
+This sample AVS performs KYC on documents supplied by the user. The document (e.g. passport) picture is first sent to a confidential AI model (running in a TEE) to extract the user's nationality and age.
+
+Then, the Performer creates a message that contains the user's nationality, and two more Boolean fields: is_over_18 and is_over_21. During the execution, the user data never leaves the encrypted TEE environments and can not be observed either by the Performer node operators or by Attester node operators.
+
 ## Table of Contents
 
 - [Confidential AVS Example](#confidential-avs-example)
@@ -63,16 +73,26 @@ The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS usi
 
 ## Architecture
 
-![Price oracle sample](https://github.com/user-attachments/assets/03d544eb-d9c3-44a7-9712-531220c94f7e)
+The Confidential AVS example uses the following architecture:
 
-The Performer node executes tasks using the Task Execution Service and sends the results to the p2p network.
-
-Attester Nodes validate task execution through the Validation Service. Based on the Validation Service's response, attesters sign the tasks. In this AVS:
-
-Task Execution logic:
+<img width="15684" height="10067" alt="image" src="https://github.com/user-attachments/assets/ac99f540-bcdb-4cc7-bbe0-a1e1b6313b2e" />
 
 
-Validation Service logic:
+The Performer node is deployed in a TEE-powered SecretVM ([secretai.scrtlabs.com/secret-vms](https://secretai.scrtlabs.com/secret-vms)).  
+The ([attestation registers](https://docs.scrt.network/secret-network-documentation/secretvm-confidential-virtual-machines/attestation/attestation-report-key-fields)) identifying the Performer node should be known to the Atester nodes.
+
+The Performer Node receives information from the end user (in this case, images representing the users' government-issued IDs). The Performer node then passes the images to an image-analysys LLM in order to retrieve information about the user's citizenship and age.
+
+Once the image recognition is complete, Performer creates a  ([verifiably signed message](https://docs.scrt.network/secret-network-documentation/secretvm-confidential-virtual-machines/verifiable-message-signing)) contaning the user's nationality and two additional Boolean fields desribing the user's age:
+- is_over_18
+- is_over_21
+
+The message and the Atestation Quote of the Performer Node is then passed to the P2P networking layers and can be verified by the Attesters
+
+Attester nodes perform the following verification routine:
+1. Verify the message
+2. Verify the authenticity of the Attestation
+3. Verify that the attestation registers match the expected value (meaning that the Performer Node code has not been tampered with)
 
 ---
 
@@ -111,7 +131,7 @@ Validation Service logic:
 4. Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
 
    ```
-   cd simple-price-oracle-avs-example
+   cd kyc-avs-demo
    docker compose build --no-cache
    docker compose up
    curl -X POST http://localhost:4003/task/execute
