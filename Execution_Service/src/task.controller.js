@@ -30,6 +30,13 @@ router.post("/execute", upload.single('image'), async (req, res) => {
         var taskDefinitionId = Number(req.body.taskDefinitionId) || 0;
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
         
+        // Get public_key from request body
+        const public_key = req.body.public_key;
+        if (!public_key) {
+            return res.status(400).send(new CustomError("public_key parameter is required", {}));
+        }
+        console.log(`public_key: ${public_key}`);
+        
         // Check if file was uploaded
         if (!req.file) {
             return res.status(400).send(new CustomError("No PNG file uploaded. Please upload a PNG image.", {}));
@@ -42,12 +49,18 @@ router.post("/execute", upload.single('image'), async (req, res) => {
 
         
         const cid = await dalService.publishJSONToIpfs(result);
-        const data = "kyc verification";
+        let ageString = '';
+        if (result.response.identity.over_21) {
+            ageString = 'over_21';
+        } else if (result.response.identity.over_18) {
+            ageString = 'over_18';
+        }
+        const data = `${public_key}_${ageString}`;
 
         console.log("Sending task to DAL", data);
         await dalService.sendTask(cid, data, taskDefinitionId);
         
-        return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
+        return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId, public_key: public_key}, "Task executed successfully"));
     } catch (error) {
         console.log(error)
         // Handle multer errors specifically
